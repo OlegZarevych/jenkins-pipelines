@@ -52,6 +52,9 @@ pipeline {
                         echo "Go not found. Installing Go ${GO_VERSION}..."
                         go.installGo()
                     }
+                }
+            }
+        }
         
         stage('Build') {
             // stage specific options
@@ -128,4 +131,3 @@ pipeline {
         }
     }
 }
-
