@@ -110,11 +110,13 @@ pipeline {
 
         stage('Build Docker Image') {
             steps {
-                echo "Building Docker image for ${APP_NAME} version ${VERSION}"
-                docker.build("${APP_NAME}:${VERSION}")
-                // docker.withRegistry('https://registry.hub.docker.com', 'docker-hub-credentials') {
-                //     docker.image("${APP_NAME}:${VERSION}").push()
-                // }
+                script {
+                    echo "Building Docker image for ${APP_NAME} version ${VERSION}"
+                    docker.build("${APP_NAME}:${VERSION}")
+                    // docker.withRegistry('https://registry.hub.docker.com', 'docker-hub-credentials') {
+                    //     docker.image("${APP_NAME}:${VERSION}").push()
+                    // }
+                }
             }
         }
         
