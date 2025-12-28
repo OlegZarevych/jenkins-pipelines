@@ -1,4 +1,4 @@
-import lib.go
+@Library('my-shared-lib') _
 
 pipeline {
     agent any
@@ -50,7 +50,7 @@ pipeline {
                         echo "Go is already installed: ${goVersion}"
                     } else {
                         echo "Go not found. Installing Go ${GO_VERSION}..."
-                        go.installGo()
+                        installGo()
                     }
                 }
             }
