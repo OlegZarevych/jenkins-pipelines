@@ -1,0 +1,108 @@
+pipeline {
+    agent any
+    
+    parameters {
+        choice(name: 'ENVIRONMENT', choices: ['dev', 'prod'])
+        booleanParam(name: 'RUN_TESTS', defaultValue: true)
+    }
+    
+    environment {
+        APP_NAME = 'go-messanger'
+        VERSION = "${BUILD_NUMBER}"
+    }
+    
+    options {
+        timeout(time: 60, unit: 'MINUTES')
+           
+        //retry(3)                        // Retry entire pipeline on failure
+        //timestamps()                   // Show timestamps
+        buildDiscarder(logRotator(
+            numToKeepStr: '10',        // Keep last 10 builds
+            daysToKeepStr: '30',       // Keep builds from last 30 days
+            artifactNumToKeepStr: '5', // Keep artifacts for last 5 builds
+            artifactDaysToKeepStr: '14' // Keep artifacts from last 14 days
+        ))
+    }
+
+    stages {
+        stage('Checkout') {
+            steps {
+                git branch: 'main', url: 'https://github.com/OlegZarevych/go-messanger.git'
+            }
+        }
+        
+        stage('Build') {
+            // stage specific options
+            options {
+                timeout(time: 5, unit: 'MINUTES')  // Just this stage
+                retry(2)                            // Retry this stage twice
+                skipDefaultCheckout()               // Skip checkout for this stage
+            }
+            steps {
+                echo "Building ${APP_NAME} version ${VERSION} for ${params.ENVIRONMENT} environment"
+                sh 'go build -o go-messanger .'
+            }
+        }
+        
+        stage('Tests') {
+        parallel {
+            stage('Unit Test') {
+                when {
+                    expression { return params.RUN_TESTS }
+                }
+                steps {
+                    echo "Running tests for ${APP_NAME}"
+                }
+            }
+                // Add test commands here
+            stage('Run linters') {
+                steps {
+                    echo "Running linters for ${APP_NAME}"
+            }
+            }
+        }
+        }
+        
+        stages('Archive') {
+        parallel {
+            // for archiving artifacts
+            stage('Archive Build Artifacts') {
+                steps {
+                    echo "Archiving build artifacts for ${APP_NAME} version ${VERSION}"
+                    archiveArtifacts artifacts: 'go-messanger', fingerprint: true
+                }
+            }
+            // for sharing artifacts between stages you can use stash/unstash
+            stage('Stash Build Artifacts') {
+                steps {
+                    echo "Stashing build artifacts for ${APP_NAME} version ${VERSION}"
+                    stash includes: 'go-messanger', name: 'build-artifacts'
+                }
+            }
+        }
+        }
+        
+        stage('Deploy') {
+            steps {
+                echo "Deploying ${APP_NAME} version ${VERSION} to ${params.ENVIRONMENT} environment"
+                // Add deployment commands here
+            }
+        }
+    }
+    
+    post {
+        success {
+            echo 'Pipeline succeeded!'
+        }
+        failure {
+            echo 'Pipeline failed.'
+            mail to: 'oleg.zarevych@gmail.com',
+                 subject: "Build Failed: ${env.JOB_NAME}",
+                 body: "Check ${env.BUILD_URL}"
+        }
+        always {
+            echo 'Pipeline completed.'
+            cleanWs()
+        }
+    }
+}
