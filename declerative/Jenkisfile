@@ -49,7 +49,7 @@ pipeline {
                         ).trim()
                         echo "Go is already installed: ${goVersion}"
                     } else {
-                        echo "Go not found. Installing Go ${GO_VERSION}..."
+                        echo "Go not found. Installing Go ..."
                         installGo()
                     }
                 }
