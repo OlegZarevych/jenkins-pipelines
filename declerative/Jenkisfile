@@ -30,6 +30,25 @@ pipeline {
                 git branch: 'main', url: 'https://github.com/OlegZarevych/go-messanger.git'
             }
         }
+
+        stage('Check and Install Go') {
+            steps {
+                script {
+                    // Check if Go is installed
+                    def goInstalled = sh(
+                        script: 'which go',
+                        returnStatus: true
+                    ) == 0
+                    
+                    if (goInstalled) {
+                        def goVersion = sh(
+                            script: 'go version',
+                            returnStdout: true
+                        ).trim()
+                        echo "Go is already installed: ${goVersion}"
+                    } else {
+                        echo "Go not found. Installing Go ${GO_VERSION}..."
+                    }
         
         stage('Build') {
             // stage specific options
@@ -106,3 +125,4 @@ pipeline {
         }
     }
 }
+
