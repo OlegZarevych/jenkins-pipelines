@@ -1,0 +1,25 @@
+node {
+    def appName = 'go-messanger-scripted'
+    def version = "${env.BUILD_NUMBER}-scripted"
+    
+    try {
+        stage('Build') {
+            buildApp()
+        }
+        
+        stage('Test') {
+            runTests()
+        }
+        
+        stage('Docker') {
+            dockerBuild(appName, version)
+            dockerPush(appName, version)
+        }
+        
+        echo "Pipeline completed successfully!"
+        
+    } catch (Exception e) {
+        echo "Pipeline failed: ${e.message}"
+        throw e
+    }
+}
