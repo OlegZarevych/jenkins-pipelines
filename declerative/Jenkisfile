@@ -63,7 +63,7 @@ pipeline {
         }
         }
         
-        stages('Archive') {
+        stage('Archive') {
         parallel {
             // for archiving artifacts
             stage('Archive Build Artifacts') {
