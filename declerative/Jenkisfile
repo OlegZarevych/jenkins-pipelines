@@ -111,7 +111,10 @@ pipeline {
         stage('Build Docker Image') {
             steps {
                 script {
-                                        echo "Building Docker image for ${APP_NAME} version ${VERSION}"
+                    echo "Building Docker image for ${APP_NAME} version ${VERSION}"
+
+                    // for this we need to install docker-pipeline plugin
+                    // and have docker installed on the agent
                     def dockerImage = docker.build("${APP_NAME}:${VERSION}")
                     
                     // docker.withRegistry('https://docker.io', "${DOCKER_CREDENTIALS_ID}") {
