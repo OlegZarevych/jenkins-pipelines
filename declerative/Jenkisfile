@@ -122,7 +122,6 @@ pipeline {
                     //     dockerImage.push("latest")
                     }
                 }
-            }
         }
         
         stage('Deploy') {
